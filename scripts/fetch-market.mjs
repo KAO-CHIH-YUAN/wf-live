@@ -1,12 +1,11 @@
-// 由 GitHub Actions 執行：讀取 config.json 指定帳號的 warframe.market 出售掛單、
+// 由 GitHub Actions 執行：讀取指定帳號（環境變數 WM_USER）的 warframe.market 出售掛單、
 // 各物品線上遊戲中玩家的買賣價格（對齊等級）與成交統計，輸出成 market.json。
-// 網頁在同一個網域讀取這個檔案，因此不受瀏覽器跨網站限制。
-import { readFile, writeFile } from "node:fs/promises";
+// 工作流程會把結果推到 data 分支，網頁再透過 GitHub API 讀取（GitHub API 允許跨網站讀取）。
+import { writeFile } from "node:fs/promises";
 
 const WM = "https://api.warframe.market";
 const OUT = process.argv[2] || "market.json";
-const cfg = JSON.parse(await readFile("config.json", "utf8"));
-const user = String(cfg.user || "").trim().toLowerCase();
+const user = String(process.env.WM_USER || "").trim().toLowerCase().replace(/^.*\/profile\//, "").replace(/[/?#].*$/, "");
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 async function get(path) {
@@ -22,7 +21,7 @@ async function get(path) {
 
 const out = { user, t: Date.now(), orders: [], items: {}, book: {}, stats: {}, errors: [] };
 if (!user) {
-  out.errors.push("config.json 尚未設定 warframe.market 帳號");
+  out.errors.push("沒有提供 warframe.market 帳號");
 } else {
   const mine = await get(`/v2/orders/user/${encodeURIComponent(user)}`);
   const sells = (mine.data || []).filter((o) => o.type === "sell");

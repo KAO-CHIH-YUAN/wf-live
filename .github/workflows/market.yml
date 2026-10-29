@@ -1,0 +1,41 @@
+name: Update market data
+
+# 只在需要時執行：由網頁的「讀取我的 WTS 並更新價格」按鈕觸發，或在 Actions 頁面手動 Run workflow。
+on:
+  workflow_dispatch:
+    inputs:
+      user:
+        description: "warframe.market 帳號（個人頁網址最後一段）"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: market-data
+  cancel-in-progress: false
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Fetch warframe.market data
+        env:
+          WM_USER: ${{ inputs.user }}
+        run: node scripts/fetch-market.mjs market.json
+      - name: Publish to data branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir out && mv market.json out/ && cd out
+          git init -q -b data
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add market.json
+          git commit -q -m "Update market data"
+          git push -q -f "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git" data

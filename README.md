@@ -2,7 +2,7 @@
 
 一個免安裝、單一檔案的靜態網頁工具，協助《Warframe》玩家掌握兩類時效性高的資訊：**本期 Prime 重生（Prime Resurgence）販售的遺物與其獎勵**，以及 **warframe.market 上自己掛單物品的即時行情**。網頁在瀏覽器端直接讀取公開 API，不需要後端伺服器、不需要登入，也不蒐集任何使用者資料。
 
-> 線上版本：部署於 GitHub Pages，網址見本專案右側的「Website」欄位。
+> 線上版本：<https://kao-chih-yuan.github.io/wf-live/>
 
 ---
 

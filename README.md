@@ -1,6 +1,6 @@
 # Warframe 即時工具（Warframe Live Tools）
 
-一個免安裝、單一檔案的靜態網頁工具，協助《Warframe》玩家掌握兩類時效性高的資訊：**本期 Prime 重生（Prime Resurgence）販售的遺物與其獎勵**，以及 **warframe.market 上自己掛單物品的即時行情**。網頁在瀏覽器端直接讀取公開 API，不需要後端伺服器、不需要登入，也不蒐集任何使用者資料。
+一個免安裝的靜態網頁工具，協助《Warframe》玩家掌握兩類時效性高的資訊：**本期 Prime 重生（Prime Resurgence）販售的遺物與其獎勵**，以及 **warframe.market 上自己掛單物品的即時行情**。Prime 重生資料由瀏覽器直接讀取公開 API；市場資料由 GitHub Actions 定時抓取後隨網站一起部署。整個專案不需要自架伺服器、不需要登入，也不蒐集任何使用者資料。
 
 > 線上版本：<https://kao-chih-yuan.github.io/wf-live/>
 
@@ -34,8 +34,11 @@
 
 ## 技術架構
 
-- **單一 HTML 檔案**：HTML、CSS、JavaScript 與所需的靜態資料全部內嵌在 `index.html`，可直接部署於任何靜態網站代管服務，無建置步驟、無第三方函式庫。
-- **純前端資料讀取**：使用瀏覽器 `fetch` 直接呼叫公開 REST API，並以佇列控制請求間隔（約每 0.35 秒一次），遵守 warframe.market 每秒 3 次的請求限制。
+- **單一 HTML 檔案**：HTML、CSS、JavaScript 與所需的靜態資料全部內嵌在 `index.html`，無第三方函式庫。
+- **兩種資料取得方式，依 API 的跨網站政策（CORS）而定**：
+  - warframestat.us 允許網頁跨網站讀取，因此「本期 Prime 重生」由瀏覽器以 `fetch` 即時讀取。
+  - warframe.market 的 API 不接受其他網站的網頁直接讀取，因此改由 **GitHub Actions** 每小時執行 `scripts/fetch-market.mjs`（Node.js，無相依套件），抓取掛單、行情與成交統計，輸出 `market.json`，再與網頁一起部署到 GitHub Pages。網頁讀取同網域的 `market.json`，不受跨網站限制；需要立即更新時，可在 Actions 頁面手動執行（`workflow_dispatch`）。
+  - 抓取程式以固定間隔送出請求並在遇到 HTTP 429 時退避重試，遵守 warframe.market 每秒 3 次的請求限制。
 - **離線資料對照**：遺物獎勵表、物品中英文名稱、物品圖示等相對固定的資料，在產生網頁時由 [WFCD warframe-items](https://github.com/WFCD/warframe-items) 預先整理並內嵌，執行時只需讀取會變動的部分（本期商品、即時掛單與成交統計），減少請求次數。
 - **本機快取**：最近一次讀取的結果、物品基本資料與成交統計會存在瀏覽器的 `localStorage`，重新開啟頁面時可立即顯示上次的資料。
 - **響應式設計**：同一份頁面在桌機與手機皆可使用，並支援系統的深色模式。
@@ -45,15 +48,24 @@
 | 用途 | 來源 |
 |---|---|
 | 本期 Prime 重生商品 | [warframestat.us API](https://docs.warframestat.us/)（`/pc/vaultTrader`） |
-| 掛單、物品資訊 | [warframe.market API v2](https://warframe.market/)（`/v2/orders/user/{slug}`、`/v2/item/{id}`、`/v2/orders/item/{slug}`） |
-| 成交統計 | warframe.market API v1（`/v1/items/{slug}/statistics`） |
+| 掛單、物品資訊（GitHub Actions 抓取） | [warframe.market API v2](https://warframe.market/)（`/v2/orders/user/{slug}`、`/v2/item/{id}`、`/v2/orders/item/{slug}`） |
+| 成交統計（GitHub Actions 抓取） | warframe.market API v1（`/v1/items/{slug}/statistics`） |
 | 遺物獎勵、物品名稱與圖示 | [WFCD warframe-items](https://github.com/WFCD/warframe-items) |
 
 ## 使用方式
 
 1. 開啟部署後的網址（或下載 `index.html` 以瀏覽器開啟；部分瀏覽器會限制本機檔案存取外部 API，建議使用網址開啟）。
 2. **本期 Prime 重生**：按「更新本期 Prime 重生」。如需標示尚未完成的物品，展開「匯入段位清單的進度」並貼上備份碼。
-3. **交易市場**：輸入 warframe.market 個人頁網址的最後一段（帳號代稱），按「讀取我的 WTS 並更新價格」。
+3. **交易市場**：在 `config.json` 填入 warframe.market 個人頁網址的最後一段（帳號代稱），之後每小時自動更新。需要立即更新時，到 Actions 頁面的「Update market data & deploy」按 **Run workflow**，約 2～3 分鐘後回到網頁按「重新讀取最新資料」。
+
+### 專案結構
+
+```
+index.html                     網頁本體（含內嵌資料）
+config.json                    要追蹤的 warframe.market 帳號
+scripts/fetch-market.mjs       抓取市場資料、輸出 market.json
+.github/workflows/pages.yml    每小時抓取資料並部署到 GitHub Pages
+```
 
 ## 隱私
 
@@ -64,7 +76,7 @@
 ## 限制
 
 - 資料的即時性與正確性取決於上述第三方 API；若 API 調整格式或暫停服務，相關功能可能暫時無法使用。
-- 第一次讀取交易資料時，每筆掛單需要多次請求，掛單較多時需等待數十秒。
+- 市場資料為定時抓取的快照（預設每小時一次），不是逐秒即時；GitHub 排程在尖峰時段可能延遲數分鐘。
 - 遺物獎勵表為產生網頁時的版本，遊戲更新加入新遺物後需要重新產生。
 
 ## 版權與聲明

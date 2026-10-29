@@ -1,0 +1,44 @@
+name: Update market data & deploy
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "17 * * * *"   # 每小時更新一次市場資料
+  workflow_dispatch: {}     # 可在 Actions 頁面手動「Run workflow」立即更新
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Build site
+        run: |
+          mkdir -p _site
+          cp index.html .nojekyll _site/
+          node scripts/fetch-market.mjs _site/market.json || echo '{"user":"","t":0,"orders":[],"items":{},"book":{},"stats":{},"errors":["抓取失敗，請查看 Actions 紀錄"]}' > _site/market.json
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

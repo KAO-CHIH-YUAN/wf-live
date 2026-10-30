@@ -1,6 +1,6 @@
 # Warframe 即時工具（Warframe Live Tools）
 
-一個免安裝的靜態網頁工具，協助《Warframe》玩家掌握兩類時效性高的資訊：**本期 Prime 重生（Prime Resurgence）販售的遺物與其獎勵**，以及 **warframe.market 上自己掛單物品的即時行情**。Prime 重生資料由瀏覽器直接讀取公開 API；市場資料在使用者按下更新時，由 GitHub Actions 代為抓取。整個專案不需要自架伺服器、不需要登入，也不蒐集任何使用者資料。
+一個免安裝的靜態網頁工具，協助《Warframe》玩家掌握兩類時效性高的資訊：**本期 Prime 重生（Prime Resurgence）販售的遺物與其獎勵**、**warframe.market 上自己掛單物品的即時行情**，以及**目前與接下來的仲裁（Arbitration）任務**。Prime 重生資料由瀏覽器直接讀取公開 API；市場資料在使用者按下更新時，由 GitHub Actions 代為抓取。整個專案不需要自架伺服器、不需要登入，也不蒐集任何使用者資料。
 
 > 線上版本：<https://kao-chih-yuan.github.io/wf-live/>
 
@@ -23,6 +23,10 @@
 - 每項獎勵可直接連到 warframe.market 的物品頁面。
 - 可匯入收集進度（由配套的段位清單工具產生的備份碼），標示尚未完成的物品並提供篩選。
 - 更新後產生「本期代碼」並提供一鍵複製，可匯入配套的段位清單工具，在該工具內對照收集進度。
+
+### 目前仲裁
+- 顯示目前仲裁的節點（中英對照）、任務類型、敵人派系與剩餘時間，倒數歸零後自動更新。
+- 列出接下來 12 小時的仲裁排程，方便安排想打的地圖。
 
 ### 交易市場
 - 輸入 warframe.market 帳號後，自動讀取該帳號所有公開的出售（WTS）掛單。
@@ -55,7 +59,10 @@
 | 本期 Prime 重生商品 | [warframestat.us API](https://docs.warframestat.us/)（`/pc/vaultTrader`） |
 | 掛單、物品資訊（GitHub Actions 抓取） | [warframe.market API v2](https://warframe.market/)（`/v2/orders/user/{slug}`、`/v2/item/{id}`、`/v2/orders/item/{slug}`） |
 | 成交統計（GitHub Actions 抓取） | warframe.market API v1（`/v1/items/{slug}/statistics`） |
+| 目前仲裁 | warframestat.us API（`/pc/arbitration`） |
+| 仲裁排程 | [browse.wf](https://browse.wf/) 社群推算的仲裁排程（`arbys.txt`） |
 | 遺物獎勵、物品名稱與圖示 | [WFCD warframe-items](https://github.com/WFCD/warframe-items) |
+| 星圖節點中英名稱 | [WFCD warframe-worldstate-data](https://github.com/WFCD/warframe-worldstate-data) |
 
 ## 使用方式
 

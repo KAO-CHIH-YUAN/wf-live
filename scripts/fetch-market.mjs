@@ -13,7 +13,11 @@ async function get(path) {
     const r = await fetch(WM + path, { headers: { Accept: "application/json", "User-Agent": "wf-live (GitHub Actions; personal price tracker)" } });
     await sleep(400); // warframe.market 限制每秒 3 次
     if (r.status === 429) { await sleep(3000); continue; }
-    if (!r.ok) throw new Error(`${path} -> HTTP ${r.status}`);
+    if (!r.ok) {
+      const body = (await r.text().catch(() => "")).slice(0, 200).replace(/\s+/g, " ");
+      const cf = /just a moment|cloudflare|cf-ray|attention required/i.test(body) ? "（被 Cloudflare 防護擋下）" : "";
+      throw new Error(`${path} -> HTTP ${r.status}${cf}`);
+    }
     return r.json();
   }
   throw new Error(`${path} -> too many retries`);
@@ -23,7 +27,9 @@ const out = { user, t: Date.now(), orders: [], items: {}, book: {}, stats: {}, e
 if (!user) {
   out.errors.push("沒有提供 warframe.market 帳號");
 } else {
-  const mine = await get(`/v2/orders/user/${encodeURIComponent(user)}`);
+  let mine = { data: [] };
+  try { mine = await get(`/v2/orders/user/${encodeURIComponent(user)}`); }
+  catch (e) { out.errors.push(`讀取 ${user} 的掛單失敗：${e.message}`); }
   const sells = (mine.data || []).filter((o) => o.type === "sell");
   for (const o of sells) {
     try {
@@ -54,4 +60,5 @@ if (!user) {
 }
 await writeFile(OUT, JSON.stringify(out));
 console.log(`orders=${out.orders.length} errors=${out.errors.length}`);
-if (out.errors.length) console.log(out.errors.join("\n"));
+for (const e of out.errors.slice(0, 10)) console.log(`::warning::${e}`);
+if (!out.orders.length && out.errors.length) { console.log(`::error::${out.errors[0]}`); }

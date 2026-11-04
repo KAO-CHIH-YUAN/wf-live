@@ -36,7 +36,7 @@ if (!user) {
       let it = out.items[o.itemId];
       if (!it) {
         const d = (await get(`/v2/item/${o.itemId}`)).data;
-        it = out.items[o.itemId] = { slug: d.slug, gameRef: d.gameRef || "", name: d.i18n?.en?.name || d.slug, maxRank: d.maxRank ?? null, tags: d.tags || [] };
+        it = out.items[o.itemId] = { slug: d.slug, gameRef: d.gameRef || "", name: d.i18n?.en?.name || d.slug, maxRank: d.maxRank ?? null, tags: d.tags || [], thumb: d.i18n?.en?.thumb || "", icon: d.i18n?.en?.icon || "" };
       }
       const rank = it.maxRank != null ? (o.rank ?? 0) : null;
       const ord = { id: o.id, itemId: o.itemId, slug: it.slug, platinum: o.platinum, quantity: o.quantity, rank };

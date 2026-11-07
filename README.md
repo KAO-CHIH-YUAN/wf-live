@@ -25,10 +25,10 @@
 - 更新後產生「本期代碼」並提供一鍵複製，可匯入配套的段位清單工具，在該工具內對照收集進度。
 
 ### 目前仲裁
-- 顯示目前仲裁的節點（中英對照）、段位評級、任務類型、敵人派系、黑暗地帶資源加成與剩餘時間，倒數歸零後自動切換到下一場。
+- 顯示目前仲裁的節點（中英對照）、評級（S～F，社群對地圖的評價）、任務類型、敵人派系、黑暗地帶資源加成與剩餘時間，倒數歸零後自動切換到下一場。
 - 排程可選擇範圍（24 小時、7 天、30 天、90 天、12 個月或全部），依日期分組，並可切換本地時間／UTC 與 24 小時制、12 小時制、軍用時間格式。
-- 可依段位（S～F）、任務類型與派系篩選；提供「只看 S／A」快速篩選。
-- 「下次出現」表格依段位、任務類型、派系分別列出最近一次的時間與倒數，方便等待特定地圖。
+- 可依評級（S～F）、任務類型與派系篩選；提供「只看 S／A」快速篩選。
+- 「下次出現」表格依評級、任務類型、派系分別列出最近一次的時間與倒數，方便等待特定地圖。
 - 顯示設定與篩選條件會保存在瀏覽器，並寫入網址（`#ar&…`），可直接分享相同條件的連結。
 
 ### 交易市場
@@ -65,7 +65,7 @@
 | 掛單、物品資訊（GitHub Actions 抓取） | [warframe.market API v2](https://warframe.market/)（`/v2/orders/user/{slug}`、`/v2/item/{id}`、`/v2/orders/item/{slug}`） |
 | 成交統計（GitHub Actions 抓取） | warframe.market API v1（`/v1/items/{slug}/statistics`） |
 | 仲裁排程與目前仲裁 | [browse.wf](https://browse.wf/) 社群推算的仲裁排程（`arbys.txt`）；無法讀取時改用 warframestat.us（`/pc/arbitration`） |
-| 仲裁段位評級 | [arbi.guide](https://arbi.guide/) 社群整理，經由 browse.wf 取得 |
+| 仲裁地圖評級 | [arbi.guide](https://arbi.guide/) 社群整理，經由 browse.wf 取得 |
 | 節點名稱、任務類型、派系、黑暗地帶加成 | [warframe-public-export-plus](https://github.com/calamity-inc/warframe-public-export-plus)（遊戲匯出資料，含繁體中文語系） |
 | 遺物獎勵、物品名稱與圖示 | [WFCD warframe-items](https://github.com/WFCD/warframe-items) |
 | 星圖節點中英名稱 | [WFCD warframe-worldstate-data](https://github.com/WFCD/warframe-worldstate-data) |
